@@ -1,0 +1,33 @@
+version = 1
+
+currency = "czk"
+secrets_file = "secrets.env"
+storage_file = "data.store"
+
+[[strategies]]
+name = "MinRatioAssetStrategy"
+weight = 0.5
+
+[[strategies]]
+name = "DCAStrategy"
+weight = 0.5
+
+[spend]
+amount = "$SPEND_AMOUNT_USD"
+currency = "USD"
+
+[ideal]
+stock = 50
+gold = 30
+cash = 20
+
+[providers.physical.data]
+gold_physical = "$PHYSICAL_GOLD_OUNCES"
+czk_portu = "$PHYSICAL_CZK_PORTU"
+goldoz_czk = 56_500
+
+# XTB demo account
+[providers.xtb.data]
+url = "wss://ws.xtb.com/demo"
+login = "$XTB_DEMO_LOGIN"
+password = "$XTB_DEMO_PASSWORD"

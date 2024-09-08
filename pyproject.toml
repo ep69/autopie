@@ -1,0 +1,49 @@
+[project]
+name = "autopie"
+version = "0.0.5"
+description = "Boring investment automation"
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+    "websocket-client>=1.8.0",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+authors = [
+  { name = "Emperor Palpatin", email = "e.p@centrum.cz" },
+]
+maintainers = [
+  { name = "Emperor Palpatin", email = "e.p@centrum.cz" },
+]
+
+[project.scripts]
+"autopie" = "autopie:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/autopie"]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+
+  "Topic :: Office/Business :: Financial :: Investment",
+
+  "License :: OSI Approved :: MIT License",
+
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Repository = "https://github.com/ep69/autopie.git"
+
