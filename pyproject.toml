@@ -1,11 +1,12 @@
 [project]
 name = "autopie"
-version = "0.0.5"
+version = "0.0.6"
 description = "Boring investment automation"
 dependencies = [
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
     "websocket-client>=1.8.0",
+    "click>=8.1.7",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

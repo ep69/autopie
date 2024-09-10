@@ -8,6 +8,7 @@ import sys
 import dotenv
 import tomllib
 from copy import deepcopy
+import click
 
 from .core import AbstractPortfolio, RealPortfolio, Price, Provider, Strategy
 from .util import *
@@ -43,13 +44,29 @@ def substitute_secrets(secrets, data):
         debug(f"substitute_secrets: type of {data} is {type(data)}")
         return
 
-def main():
-    # TODO make configurable
-    #set_verbose()
+@click.command()
+@click.option(
+        "-d", "--debug", "debug_level",
+        type=click.IntRange(min=0, max=2),
+        default=0,
+        show_default=True,
+        help="Debug level",
+    )
+@click.option(
+        "--config-dir",
+        type=click.Path(file_okay=False),
+        envvar="AUTOPIE_CONFDIR",
+        default=os.environ.get("XDG_CONFIG_HOME", "~/.config")+"/autopie",
+        show_default=True,
+        help="Configuration directory",
+    )
+def main(debug_level=0, config_dir="~/.config"):
+    set_verbose(debug_level)
+    info(f"Debug: {debug_level}")
 
-    config_dir = os.environ.get("XDG_CONFIG_HOME", "~/.config")
-    config_dir = os.path.expanduser(f"{config_dir}/autopie")
     debug(f"config dir {config_dir}")
+    config_dir = os.path.expanduser(config_dir)
+    debug(f"config dir expanded {config_dir}")
     config_file = os.path.join(config_dir, "config.toml")
     debug(f"Reading config file {config_file}")
     with open(config_file, "rb") as fp:
