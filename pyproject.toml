@@ -1,6 +1,6 @@
 [project]
 name = "autopie"
-version = "0.0.6"
+version = "0.0.7"
 description = "Boring investment automation"
 dependencies = [
     "python-dotenv>=1.0.1",
