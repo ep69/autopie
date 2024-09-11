@@ -58,6 +58,7 @@ class XTB(Provider):
 
     _ASSET_CLASSES = {
         "VWRA.UK": "stock",
+        "IGLN.UK": "gold",
         "IGLN.UK_9": "gold",
         "IB01.UK": "cash",
     }
@@ -98,7 +99,10 @@ class XTB(Provider):
         for symbol, amount in pf_amounts.items():
             status, data = self._ws_send("getSymbol", symbol=symbol)
             if not status:
-                error("XTB getSymbol {symbol} {data}")
+                # some symbols are different in real and demo version,
+                # e.g., IGLN.UK / IGLN.UK_9; continue if not found
+                debug2(f"XTB getSymbol {symbol} not found (data: {data})")
+                continue
             debug2(f"XTB getSymbol({symbol}): {pprint.pformat(data)}")
             avg_price = (data["bid"]+data["ask"] ) / 2
             currency = data["currency"]
