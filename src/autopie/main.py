@@ -14,7 +14,7 @@ from .core import AbstractPortfolio, RealPortfolio, Price, Provider, Strategy
 from .util import *
 
 # TODO discover and import all providers dynamically
-from .providers.physical import Physical
+from .providers.offline import Offline
 from .providers.xtb_treasury import XTB
 
 from .currency import get_rate
