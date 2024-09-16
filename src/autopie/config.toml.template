@@ -21,10 +21,20 @@ stock = 50
 gold = 30
 cash = 20
 
-[providers.physical.data]
-gold_physical = "$PHYSICAL_GOLD_OUNCES"
-czk_portu = "$PHYSICAL_CZK_PORTU"
-goldoz_czk = 56_500
+[[providers.offline.data.assets]]
+name = "Physical Gold Ounces"
+aclass = "gold"
+amount = "$PHYSICAL_GOLD_OUNCES"
+price = 56_500
+currency = "czk"
+
+[[providers.offline.data.assets]]
+name = "Cash CZK"
+aclass = "cash"
+amount = "$CASH_CZK"
+price = 1
+currency = "czk"
+
 
 # XTB demo account
 [providers.xtb.data]
