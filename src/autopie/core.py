@@ -10,6 +10,8 @@ from copy import deepcopy
 from .util import *
 from .currency import get_rate
 
+PRECISION = Decimal(0.00000001)
+
 # class Price: ? # number, currency
 # class Product: ? # or just dict # should include price, class
 # class Asset: ? # product, num
@@ -45,11 +47,15 @@ class Price:
         return str(self)
 
 class Product:
-    def __init__(self, name, aclass, price, provider):
+    def __init__(self, name, aclass, price, provider, other=None):
         self.name = name
         self.aclass = aclass
         self.price = price
         self.provider = provider
+        if other is None:
+            self.other = {}
+        else:
+            self.other = other
     def __str__(self):
         #return f"{self.name} ({self.aclass}, {str(self.price)})"
         return f"[{self.aclass}] ({self.name} @{str(self.price)} /{self.provider})"
@@ -112,14 +118,12 @@ class Provider(ABC):
                 product = p
                 break
         if product is None:
+            debug(f"Provider {self.name} buy_aclass: product not found for aclass {aclass}")
             return None
-        debug(f"Provided {self.name} buy_aclass found product {product}")
-        amount = floor(price.num / get_rate(product.price.unit, price.unit) / product.price.num)
-        debug(f"buy_aclass: computing amount: {price.num:.2f} / {get_rate(product.price.unit, price.unit):.2f} / {product.price.num:.2f} = {amount}")
+        debug(f"Provider {self.name} buy_aclass found product {product}")
+        amount = price.num / get_rate(product.price.unit, price.unit) / product.price.num
+        debug(f"buy_aclass: computing amount: {price.num:.2f} / {get_rate(product.price.unit, price.unit):.2f} / {product.price.num:.2f} = {amount:.8f}")
         assert(amount >= 0)
-        if amount < 1:
-            warn(f"buy_aclass: not buying zero amount")
-            return None
         res = self.buy(product, amount)
         if res:
             return RealPortfolio(values={aclass: amount*product.price.num}, currency=product.price.unit)
@@ -257,7 +261,12 @@ class RealPortfolio:
             if oc not in self.values:
                 error(f"RealPortfolio: -= not possible for {oc}")
             price = self.values[oc]
+            debug2(f"RealPortfolion: -= original price: {price}")
             price -= ov * get_rate(other.currency, self.currency)
+            debug2(f"RealPortfolion: -= updated price: {price}")
+            if -PRECISION < price < 0.0:
+                debug2(f"RealPortfolion: -= price slightly negative: {price}")
+                price = Decimal(0)
             assert price >= 0
             self._values[oc] = price
         return self

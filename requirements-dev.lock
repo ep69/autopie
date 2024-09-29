@@ -18,10 +18,13 @@ click==8.1.7
     # via autopie
 idna==3.8
     # via requests
+krakenex==2.2.2
+    # via autopie
 python-dotenv==1.0.1
     # via autopie
 requests==2.32.3
     # via autopie
+    # via krakenex
 urllib3==2.2.2
     # via requests
 websocket-client==1.8.0
