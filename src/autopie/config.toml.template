@@ -35,9 +35,14 @@ amount = "$CASH_CZK"
 price = 1
 currency = "czk"
 
-
 # XTB demo account
 [providers.xtb.data]
 url = "wss://ws.xtb.com/demo"
 login = "$XTB_DEMO_LOGIN"
 password = "$XTB_DEMO_PASSWORD"
+
+[providers.kraken.data]
+currency = "EUR"
+token_key = "$KRAKEN_KEY"
+token_secret = "$KRAKEN_SECRET"
+dryrun = true

@@ -16,6 +16,7 @@ from .util import *
 # TODO discover and import all providers dynamically
 from .providers.offline import Offline
 from .providers.xtb_treasury import XTB
+from .providers.kraken import Kraken
 
 from .currency import get_rate
 from . import storage
@@ -197,6 +198,10 @@ def main(debug_level=0, config_dir="~/.config"):
     debug(f"Wanted to buy: {portfolio_to_buy}")
     debug(f"Bought: {total_bought}")
     debug(f"Remained: {remains}")
+
+    for provider in providers:
+        debug2(f"Provider {provider.name} cleanup")
+        provider.clean()
 
     return 0
 

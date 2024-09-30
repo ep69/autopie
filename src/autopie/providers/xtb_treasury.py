@@ -2,7 +2,7 @@ import json
 import time
 from websocket import create_connection, WebSocketConnectionClosedException
 import pprint
-from math import ceil
+from math import ceil, floor
 
 from ..currency import get_rate
 from ..core import Provider, Price, Product, Asset
@@ -171,7 +171,12 @@ class XTB(Provider):
         return False
 
     def buy(self, product, amount):
-        debug2(f"XTB buying {amount} of {product}")
+        debug2(f"XTB want to buy {amount:.4f} of {product}")
+        amount = int(floor(amount))
+        debug2(f"XTB actually want to buy {amount} of {product} (no fractions)")
+        if amount < 1:
+            debug(f"XTB: not buying zero amount")
+            return None
 
         free_cash = self._get_free_cash()
         need_cash = float(amount * product.price.num * get_rate(product.price.unit, self._account_currency))
