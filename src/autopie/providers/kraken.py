@@ -97,7 +97,7 @@ class Kraken(Provider):
             else:
                 error(f"Cannot get price of {k}")
             assert(price is not None)
-            
+
             product = Product(
                 name=name,
                 aclass=ac,
@@ -175,7 +175,7 @@ class Kraken(Provider):
             elif err:
                 for m in err:
                     warn(f"Buy error: {m}")
-                error(f"Kraken buy: unknown error {err}")
+                return False
             else: # success
                 debug(f"Kraken buy loop: success")
                 return True
