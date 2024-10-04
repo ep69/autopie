@@ -130,7 +130,7 @@ class Kraken(Provider):
         debug(f"Kraken minimum for {product.name}: {ordermin}")
         if amount <= ordermin:
             debug(f"Cannot buy {amount:.8f} of {product.name}, minimum is {ordermin}")
-            return False
+            return 0.0
 
         buy_data = {
             "pair": product.name,
@@ -171,10 +171,10 @@ class Kraken(Provider):
             elif err:
                 for m in err:
                     warn(f"Buy error: {m}")
-                return False
+                return 0.0
             else: # success
                 debug2(f"Kraken buy loop: success")
-                return True
+                return amount
 
         # "timeout", no iteration succeeded
-        return False
+        return 0.0

@@ -176,7 +176,7 @@ class XTB(Provider):
         debug2(f"XTB actually want to buy {amount} of {product} (no fractions)")
         if amount < 1:
             debug(f"XTB: not buying zero amount")
-            return None
+            return 0.0
 
         free_cash = self._get_free_cash()
         need_cash = float(amount * product.price.num * get_rate(product.price.unit, self._account_currency))
@@ -198,7 +198,7 @@ class XTB(Provider):
             res = self._sell(cash_product, sell_amount)
             if not res:
                 warn(f"XTB error selling {sell_amount} of cash product {cash_product}")
-                return False
+                return 0.0
             debug2(f"XTB buy: successfully sold {sell_amount} of {cash_product.name}")
         tti = {
             "cmd": 0, # BUY
@@ -217,25 +217,25 @@ class XTB(Provider):
         debug2(f"XTB buy tradeTransaction sent {status} {data}")
         if not status:
             warn(f"XTB buy error: {data}")
-            return False
+            return 0.0
         order = data.get("order", None)
         if not order:
             warn(f"XTB buy error: no order data")
-            return False
+            return 0.0
 
         status, data = self._ws_send("tradeTransactionStatus", order=order)
         if not status:
             warn(f"XTB status error: {data}")
-            return False
+            return 0.0
         debug2(f"XTB buy tradeTransactionStatus sent {status} {data}")
         order_status = data.get("requestStatus", None)
         if order_status is None:
             warn(f"XTB buy error: no requestStatus")
-            return False
+            return 0.0
 
         if order_status in (1, 3):
             # order is PENDING or ACCEPTED
             debug(f"XTB bought {amount} of {product}")
-            return True
-        return False
+            return amount
+        return 0.0
 

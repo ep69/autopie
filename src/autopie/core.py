@@ -119,16 +119,13 @@ class Provider(ABC):
                 break
         if product is None:
             debug(f"Provider {self.name} buy_aclass: product not found for aclass {aclass}")
-            return None
+            return (None, None)
         debug(f"Provider {self.name} buy_aclass found product {product}")
         amount = price.num / get_rate(product.price.unit, price.unit) / product.price.num
         debug(f"buy_aclass: computing amount: {price.num:.2f} / {get_rate(product.price.unit, price.unit):.2f} / {product.price.num:.2f} = {amount:.8f}")
         assert(amount >= 0)
-        res = self.buy(product, amount)
-        if res:
-            return RealPortfolio(values={aclass: amount*product.price.num}, currency=product.price.unit)
-        else:
-            return None
+
+        return (product, self.buy(product, amount))
 
     def buy_real_portfolio(self, portfolio):
         debug(f"buy_real_portfolio: provider {self.name}, portfolio to buy {portfolio}")
@@ -137,11 +134,18 @@ class Provider(ABC):
         debug2(f"buy_real_portfolio: provider {self.name}, total_bought init {total_bought}")
         for ac, amount in portfolio.values.items():
             debug2(f"buy_real_portfolio: provider {self.name}, trying to buy {ac} {amount:.2f}")
-            bought = self.buy_aclass(ac, Price(amount, currency))
-            debug(f"buy_real_portfolio: provider {self.name}, tried to buy {ac} {amount:.2f}, bought {bought}")
-            if bought is not None:
-                debug(f"Provider {self.name} bought: {bought}")
-                total_bought += bought
+            bought_product, bought_amount = self.buy_aclass(ac, Price(amount, currency))
+            if bought_product is None:
+                continue
+            if not bought_amount:
+                bought_amount = 0.0
+            bought_amount = float(bought_amount)
+            debug(f"buy_real_portfolio: provider {self.name}, tried to buy {ac} {amount:.2f}, bought {bought_amount}")
+            #total_bought += bought_amount
+            total_bought += RealPortfolio(
+                values={ ac: Decimal(bought_amount)*bought_product.price.num },
+                currency=bought_product.price.unit
+            )
             debug2(f"buy_real_portfolio: provider {self.name}, total_bought step {total_bought}")
         debug(f"buy_real_portfolio: provider {self.name}, total_bought {total_bought}")
         return total_bought # what was bought
