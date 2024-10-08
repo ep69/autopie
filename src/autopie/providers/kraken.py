@@ -97,7 +97,7 @@ class Kraken(Provider):
             else:
                 error(f"Cannot get price of {k}")
             assert(price is not None)
-            
+
             product = Product(
                 name=name,
                 aclass=ac,
@@ -130,27 +130,19 @@ class Kraken(Provider):
         debug(f"Kraken minimum for {product.name}: {ordermin}")
         if amount <= ordermin:
             debug(f"Cannot buy {amount:.8f} of {product.name}, minimum is {ordermin}")
-            return False
+            return 0.0
 
-        # TODO check balance?
-
-        def _buy():
-            debug2(f"Kraken trying to buy {amount} of {product.name}")
-            data = {
-                "pair": product.name,
-                "type": "buy",
-                "ordertype": "market",
-                "leverage": "none",
-                "volume": str(amount),
-            }
-            if self._dryrun:
-                debug2("Kraken: Dryrun, just validate the transaction")
-                data["validate"] = True
-            debug2(f"Kraken request: AddOrder {data}")
-            reply = self._k.query_private("AddOrder", data)
-            debug2(f"Kraken AddOrder returned: {reply}")
-
-            return reply["error"]
+        buy_data = {
+            "pair": product.name,
+            "type": "buy",
+            "ordertype": "market",
+            "leverage": "none",
+            "volume": str(amount),
+        }
+        if self._dryrun:
+            debug2("Kraken: Dryrun, just validate the transaction")
+            buy_data["validate"] = True
+        debug2(f"Kraken request: AddOrder request data: {buy_data}")
 
         t = 0
         MAX_TRIES = 5
@@ -158,7 +150,11 @@ class Kraken(Provider):
         while t < MAX_TRIES:
             debug2(f"Buy loop: iteration {t}")
             t += 1
-            err = _buy()
+
+            reply = self._k.query_private("AddOrder", buy_data)
+            debug2(f"Kraken AddOrder returned: {reply}")
+            err = reply["error"]
+
             recoverable_errors = [
                     "EService:Busy",
                     "EService:Unavailable",
@@ -170,19 +166,15 @@ class Kraken(Provider):
                     ]
             if len(err) >= 1 and err[0] in recoverable_errors:
                 delay = t * DELAY_INC
-                debug2(f"Kraken buy loop: recoverable error {err}, waiting {delay} seconds")
+                debug(f"Kraken buy loop: recoverable error {err}, waiting {delay} seconds")
                 time.sleep(delay)
             elif err:
                 for m in err:
                     warn(f"Buy error: {m}")
-                error(f"Kraken buy: unknown error {err}")
+                return 0.0
             else: # success
-                debug(f"Kraken buy loop: success")
-                return True
+                debug2(f"Kraken buy loop: success")
+                return amount
 
         # "timeout", no iteration succeeded
-        return False
-
-
-#if __name__ == "__main__":
-#    sys.exit(main())
+        return 0.0
