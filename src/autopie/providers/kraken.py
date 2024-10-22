@@ -163,6 +163,7 @@ class Kraken(Provider):
                     "EGeneral:Internal error",
                     "EService:Internal error",
                     "EDatabase:Internal error",
+                    "EGeneral:Timeout",
                     ]
             if len(err) >= 1 and err[0] in recoverable_errors:
                 delay = t * DELAY_INC
