@@ -20,6 +20,7 @@ from .providers.kraken import Kraken
 
 from .currency import get_rate
 from . import storage
+from . import history
 
 # Design:
 # 1. get holdings
@@ -85,6 +86,8 @@ def main(debug_level=0, config_dir="~/.config"):
         substitute_secrets(secrets, config)
         #debug(f"Config with secrets: {pformat(config)}")
 
+    history.init()
+
     data_dir = os.environ.get("XDG_DATA_HOME", "~/.local/share")
     data_dir = os.path.expanduser(f"{data_dir}/autopie")
     storage_file = os.path.join(data_dir, config.get("storage_file", "data.store"))
@@ -128,12 +131,15 @@ def main(debug_level=0, config_dir="~/.config"):
         strategy = None
         for S in Strategy.strategies:
             if S.__name__.lower() == strategy_name.lower():
+                debug2(f"Strategy {strategy_name} found")
                 strategy = S(**s)
         if strategy is None:
             error(f"Cannot find strategy")
         strategies.append(strategy)
     if len(strategies) == 0:
         error(f"No strategies loaded")
+    else:
+        debug(f"Strategies loaded: {[s.name for s in strategies]}")
 
     # get ideal portfolio
     ip = config.get("ideal", {})
@@ -159,6 +165,7 @@ def main(debug_level=0, config_dir="~/.config"):
 
     portfolio_to_buy = RealPortfolio(currency=currency)
     for strategy in strategies:
+        debug2(f"iterating strategies: {strategy.name}")
         to_buy_abstract = strategy.action(ideal, original_abstract)
         debug(f"To buy abstract: [{to_buy_abstract}]")
         to_buy_real = RealPortfolio(currency=currency, values={ac: Decimal(ratio)*spend_value for ac, ratio in to_buy_abstract.ratios.items()})
@@ -202,6 +209,8 @@ def main(debug_level=0, config_dir="~/.config"):
     for provider in providers:
         debug2(f"Provider {provider.name} cleanup")
         provider.clean()
+
+    history.clean()
 
     return 0
 

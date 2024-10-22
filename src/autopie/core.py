@@ -10,6 +10,8 @@ from copy import deepcopy
 from .util import *
 from .currency import get_rate
 
+from . import history
+
 PRECISION = Decimal(0.00000001)
 
 # class Price: ? # number, currency
@@ -349,7 +351,7 @@ class Strategy(ABC):
     def __init__(self, *, name=None, weight=None, **kwargs):
         if name is None:
             error(f"No name strategy in {self.__class__.__name__}")
-        self.name = name
+        self._name = name
 
         if weight is None:
             error(f"No weight for strategy {name}")
@@ -357,6 +359,10 @@ class Strategy(ABC):
 
         for k, v in kwargs.items():
             warn(f"Strategy {name}: unknown argument {k}: {v}")
+
+    @property
+    def name(self):
+        return self._name
 
     @abstractmethod
     def action(self, ideal, current):
@@ -386,4 +392,18 @@ class MinRatioAssetStrategy(Strategy):
             return None
         # spend all on this asset
         return AbstractPortfolio(values={aclass: Decimal(1)})
+
+class UnderperformStrategy(Strategy):
+    def action(self, ideal, current):
+        acs = ("stock", "gold")
+        
+        ratios = {}
+        for ac in acs:
+            stats = history.stats(ac)
+            ratio = stats["current"] / stats["mean"]
+            ratios[ac] = 1/ratio**2
+        debug(f"strategy underperform: ratios {ratios}")
+
+        return AbstractPortfolio(values=ratios)
+
 
