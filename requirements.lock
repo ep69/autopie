@@ -10,22 +10,59 @@
 #   universal: false
 
 -e file:.
+beautifulsoup4==4.12.3
+    # via yfinance
 certifi==2024.7.4
     # via requests
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via autopie
+frozendict==2.4.5
+    # via yfinance
+html5lib==1.1
+    # via yfinance
 idna==3.8
     # via requests
 krakenex==2.2.2
     # via autopie
+lxml==5.3.0
+    # via yfinance
+multitasking==0.0.11
+    # via yfinance
+numpy==2.1.2
+    # via pandas
+    # via yfinance
+pandas==2.2.3
+    # via autopie
+    # via yfinance
+peewee==3.17.6
+    # via yfinance
+platformdirs==4.3.6
+    # via yfinance
+python-dateutil==2.9.0.post0
+    # via pandas
 python-dotenv==1.0.1
     # via autopie
+pytz==2024.2
+    # via pandas
+    # via yfinance
 requests==2.32.3
     # via autopie
     # via krakenex
+    # via yfinance
+six==1.16.0
+    # via html5lib
+    # via python-dateutil
+soupsieve==2.6
+    # via beautifulsoup4
+tzdata==2024.2
+    # via pandas
 urllib3==2.2.2
     # via requests
+webencodings==0.5.1
+    # via html5lib
 websocket-client==1.8.0
+    # via autopie
+yfinance==0.2.44
     # via autopie

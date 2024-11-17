@@ -6,20 +6,25 @@ storage_file = "data.store"
 
 [[strategies]]
 name = "MinRatioAssetStrategy"
-weight = 0.5
+weight = 1
 
 [[strategies]]
 name = "DCAStrategy"
-weight = 0.5
+weight = 1
+
+[[strategies]]
+name = "UnderperformStrategy"
+weight = 1
 
 [spend]
 amount = "$SPEND_AMOUNT_USD"
 currency = "USD"
 
 [ideal]
-stock = 50
+stock = 40
 gold = 30
 cash = 20
+btc = 10
 
 [[providers.offline.data.assets]]
 name = "Physical Gold Ounces"
