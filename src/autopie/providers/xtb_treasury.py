@@ -170,7 +170,7 @@ class XTB(Provider):
             return True
         return False
 
-    def buy(self, product, amount):
+    def buy(self, product, amount, wait_cycles=3, wait_time=3):
         debug2(f"XTB want to buy {amount:.4f} of {product}")
         amount = int(floor(amount))
         debug2(f"XTB actually want to buy {amount} of {product} (no fractions)")
@@ -200,6 +200,18 @@ class XTB(Provider):
                 warn(f"XTB error selling {sell_amount} of cash product {cash_product}")
                 return 0.0
             debug2(f"XTB buy: successfully sold {sell_amount} of {cash_product.name}")
+            # let's wait for the free cash
+            debug2(f"XTB buy: waiting for free_cash > need_cash {need_cash:.2f}")
+            for i in range(wait_cycles):
+                debug2(f"XTB buy: waiting iteration {i}")
+                free_cash = self._get_free_cash()
+                debug2(f"XTB buy: waiting free_cash: {free_cash:.2f}")
+                if free_cash >= need_cash:
+                    debug2(f"XTB buy: free_cash is available")
+                    break
+                debug2(f"XTB buy: free_cash not yet available")
+                if i < wait_cycles-1:
+                    time.sleep(wait_time)
         tti = {
             "cmd": 0, # BUY
             #"customComment": f"buying {amount} of {product.name} ",
