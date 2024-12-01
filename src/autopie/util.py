@@ -12,16 +12,19 @@ def debug(m):
         return
     print(f"DEBUG: {m}")
 
-def debug2(m):
+def trace(m):
     if VERBOSE < 2:
         return
-    print(f"DEBUG2: {m}")
+    print(f"TRACE: {m}")
 
 def info(m):
     print(f"INFO: {m}")
 
-def warn(m):
+def warning(m):
     print(f"WARNING: {m}")
+
+def warn(m):
+    warning(m)
 
 def error(m):
     print(f"ERROR: {m}")

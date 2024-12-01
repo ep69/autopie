@@ -21,7 +21,7 @@ PRECISION = Decimal(0.00000001)
 class Price:
     def __init__(self, *args, num=None, unit=None):
         if len(args) >= 1 and len(args) <= 2:
-            debug2(f"Price args: {args}")
+            trace(f"Price args: {args}")
             if num is not None or unit is not None:
                 error(f"Price: extra num ({num}) and or unit ({unit})")
             if len(args) == 2:
@@ -133,9 +133,9 @@ class Provider(ABC):
         debug(f"buy_real_portfolio: provider {self.name}, portfolio to buy {portfolio}")
         currency = portfolio.currency
         total_bought = RealPortfolio(currency=currency)
-        debug2(f"buy_real_portfolio: provider {self.name}, total_bought init {total_bought}")
+        trace(f"buy_real_portfolio: provider {self.name}, total_bought init {total_bought}")
         for ac, amount in portfolio.values.items():
-            debug2(f"buy_real_portfolio: provider {self.name}, trying to buy {ac} {amount:.2f}")
+            trace(f"buy_real_portfolio: provider {self.name}, trying to buy {ac} {amount:.2f}")
             bought_product, bought_amount = self.buy_aclass(ac, Price(amount, currency))
             if bought_product is None:
                 continue
@@ -148,7 +148,7 @@ class Provider(ABC):
                 values={ ac: Decimal(bought_amount)*bought_product.price.num },
                 currency=bought_product.price.unit
             )
-            debug2(f"buy_real_portfolio: provider {self.name}, total_bought step {total_bought}")
+            trace(f"buy_real_portfolio: provider {self.name}, total_bought step {total_bought}")
         debug(f"buy_real_portfolio: provider {self.name}, total_bought {total_bought}")
         return total_bought # what was bought
 
@@ -213,7 +213,7 @@ class RealPortfolio:
             }
 
     def __init__(self, *, values=None , currency="USD"):
-        debug2(f"RealPortfolio __init__: values {values}, currency {currency}")
+        trace(f"RealPortfolio __init__: values {values}, currency {currency}")
         if type(currency) is not str or len(currency) != 3:
             error(f"RealPortfolio: bad currency {currency}")
         self._currency = currency.lower()
@@ -248,9 +248,9 @@ class RealPortfolio:
 
     def remove(self, ac):
         if ac in self._values:
-            debug2(f"RealPortfolio: removing {ac} from {self}")
+            trace(f"RealPortfolio: removing {ac} from {self}")
             del self._values[ac]
-            debug2(f"RealPortfolio: removed {ac} from {self}")
+            trace(f"RealPortfolio: removed {ac} from {self}")
 
 
     def __iadd__(self, other):
@@ -267,11 +267,11 @@ class RealPortfolio:
             if oc not in self.values:
                 error(f"RealPortfolio: -= not possible for {oc}")
             price = self.values[oc]
-            debug2(f"RealPortfolion: -= original price: {price}")
+            trace(f"RealPortfolion: -= original price: {price}")
             price -= ov * get_rate(other.currency, self.currency)
-            debug2(f"RealPortfolion: -= updated price: {price}")
+            trace(f"RealPortfolion: -= updated price: {price}")
             if -PRECISION < price < 0.0:
-                debug2(f"RealPortfolion: -= price slightly negative: {price}")
+                trace(f"RealPortfolion: -= price slightly negative: {price}")
                 price = Decimal(0)
             assert price >= 0
             self._values[oc] = price

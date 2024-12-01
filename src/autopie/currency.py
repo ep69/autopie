@@ -5,13 +5,13 @@ from .util import *
 cache = {}
 
 def get_rate(base, quote):
-    debug2(f"get_rate: converting {base} to {quote}")
+    trace(f"get_rate: converting {base} to {quote}")
     global cache
     base = base.strip().lower()
     quote = quote.strip().lower()
 
     if base not in cache:
-        debug2(f"get_rate: base {base} not in cache, retrieving")
+        trace(f"get_rate: base {base} not in cache, retrieving")
         url = f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{base}.min.json"
 
         resp = requests.get(url=url)
@@ -24,6 +24,6 @@ def get_rate(base, quote):
         cache[base] = data
 
     value = Decimal(cache.get(base, {}).get(quote, None))
-    debug2(f"get_rate: 1{base} = {value:.2f}{quote}")
+    trace(f"get_rate: 1{base} = {value:.2f}{quote}")
 
     return value

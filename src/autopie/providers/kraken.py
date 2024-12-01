@@ -41,9 +41,9 @@ class Kraken(Provider):
 
 
     def _refresh_assets(self):
-        debug2(f"Querying: Balance")
+        trace(f"Querying: Balance")
         data = self._k.query_private("Balance")
-        debug2(f"Returned: {data}")
+        trace(f"Returned: {data}")
         result = data.get("result", None)
         if result is None:
             error(f"Kraken: cannot get balance")
@@ -54,10 +54,10 @@ class Kraken(Provider):
             debug(f"Kraken: processing balance {k}: {v}")
             amount = float(v)
             if amount == 0.0:
-                debug2(f"Kraken: zero amount for {k}")
+                trace(f"Kraken: zero amount for {k}")
                 continue
             else:
-                debug2(f"Kraken: non-zero amount for {k}: {amount}")
+                trace(f"Kraken: non-zero amount for {k}: {amount}")
             if k == "KFEE": # ignore fee credit
                 continue
 
@@ -74,13 +74,13 @@ class Kraken(Provider):
                 price = Price(num=1, unit=curr)
             elif ac == "btc":
                 pair = f"btc/{self._currency}"
-                debug2(f"Querying: Ticker {pair}")
+                trace(f"Querying: Ticker {pair}")
                 data = self._k.query_public("Ticker", {"pair": f"{pair}"})
                 pairdata = data.get("result", {}).get(pair.upper(), None)
                 if pairdata is None:
                     error(f"cannot get Ticker data for {pair}")
 
-                debug2(f"Kraken Querying: AssetPairs {pair}")
+                trace(f"Kraken Querying: AssetPairs {pair}")
                 data = self._k.query_public("AssetPairs", {"pair": pair})
                 result = data.get("result", {})
                 if len(result) != 1:
@@ -124,7 +124,7 @@ class Kraken(Provider):
 
 
     def buy(self, product, amount):
-        debug2(f"Kraken buying {amount} of {product}")
+        trace(f"Kraken buying {amount} of {product}")
 
         ordermin = product.other["ordermin"]
         debug(f"Kraken minimum for {product.name}: {ordermin}")
@@ -140,19 +140,19 @@ class Kraken(Provider):
             "volume": str(amount),
         }
         if self._dryrun:
-            debug2("Kraken: Dryrun, just validate the transaction")
+            trace("Kraken: Dryrun, just validate the transaction")
             buy_data["validate"] = True
-        debug2(f"Kraken request: AddOrder request data: {buy_data}")
+        trace(f"Kraken request: AddOrder request data: {buy_data}")
 
         t = 0
         MAX_TRIES = 5
         DELAY_INC = 60
         while t < MAX_TRIES:
-            debug2(f"Buy loop: iteration {t}")
+            trace(f"Buy loop: iteration {t}")
             t += 1
 
             reply = self._k.query_private("AddOrder", buy_data)
-            debug2(f"Kraken AddOrder returned: {reply}")
+            trace(f"Kraken AddOrder returned: {reply}")
             err = reply["error"]
 
             recoverable_errors = [
@@ -174,7 +174,7 @@ class Kraken(Provider):
                     warn(f"Buy error: {m}")
                 return 0.0
             else: # success
-                debug2(f"Kraken buy loop: success")
+                trace(f"Kraken buy loop: success")
                 return amount
 
         # "timeout", no iteration succeeded

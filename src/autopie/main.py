@@ -141,7 +141,7 @@ def invest(debug_level, config_dir):
         strategy = None
         for S in Strategy.strategies:
             if S.__name__.lower() == strategy_name.lower():
-                debug2(f"Strategy {strategy_name} found")
+                trace(f"Strategy {strategy_name} found")
                 strategy = S(**s)
         if strategy is None:
             error(f"Cannot find strategy")
@@ -175,7 +175,7 @@ def invest(debug_level, config_dir):
 
     portfolio_to_buy = RealPortfolio(currency=currency)
     for strategy in strategies:
-        debug2(f"iterating strategies: {strategy.name}")
+        trace(f"iterating strategies: {strategy.name}")
         to_buy_abstract = strategy.action(ideal, original_abstract)
         debug(f"To buy abstract: [{to_buy_abstract}]")
         to_buy_real = RealPortfolio(currency=currency, values={ac: Decimal(ratio)*spend_value for ac, ratio in to_buy_abstract.ratios.items()})
@@ -199,12 +199,12 @@ def invest(debug_level, config_dir):
     remains = deepcopy(portfolio_to_buy)
     total_bought = RealPortfolio(currency=currency)
     for provider in providers:
-        debug2(f"Provider {provider.name} trying to buy {remains}")
+        trace(f"Provider {provider.name} trying to buy {remains}")
         bought = provider.buy_real_portfolio(remains)
-        debug2(f"Provider {provider.name} bought {bought}")
+        trace(f"Provider {provider.name} bought {bought}")
         remains -= bought
         total_bought += bought
-        debug2(f"After provider {provider.name} remains {remains}")
+        trace(f"After provider {provider.name} remains {remains}")
     debug(f"Storage: saving {remains}")
     storage.save("remains", remains)
     storage.save("original_real", original_real)
@@ -217,7 +217,7 @@ def invest(debug_level, config_dir):
     debug(f"Remained: {remains}")
 
     for provider in providers:
-        debug2(f"Provider {provider.name} cleanup")
+        trace(f"Provider {provider.name} cleanup")
         provider.clean()
 
     history.clean()

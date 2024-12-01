@@ -35,7 +35,7 @@ def _write_file(file, data):
         json.dump(data, f, indent=4)
 
 def _wrap(data):
-    debug2(f"storage: _wrap: {data}")
+    trace(f"storage: _wrap: {data}")
     # try json.dumps
     try:
         _ = json.dumps(data)
@@ -56,7 +56,7 @@ def _wrap(data):
         }
 
 def _unwrap(data):
-    debug2(f"storage: _unwrap: {data}")
+    trace(f"storage: _unwrap: {data}")
     if not all(key in data for key in ("type", "data")):
         return None
     match data["type"]:
@@ -78,11 +78,11 @@ def load(key):
     assert STORAGE is not None
     debug(f"storage: load: key: {key}")
     contents = _read_file(STORAGE)
-    debug2(f"storage: load: contents: {contents}")
+    trace(f"storage: load: contents: {contents}")
     data = contents["store"]
-    debug2(f"storage: load: data: {data}")
+    trace(f"storage: load: data: {data}")
     value = data.get(key, None)
-    debug2(f"storage: load: wrapped value: {value}")
+    trace(f"storage: load: wrapped value: {value}")
     if value is not None:
         value = _unwrap(value)
         debug(f"storage: load: value: {value}")

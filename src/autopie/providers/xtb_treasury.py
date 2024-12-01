@@ -18,11 +18,11 @@ class XTB(Provider):
             data['arguments'] = {}
             for (key, value) in args.items():
                 data['arguments'][key] = value
-        debug2(f"mkcmd data: {data}")
+        trace(f"mkcmd data: {data}")
         return data
 
     def _ws_send(self, command, **args):
-        debug2(f"XTB _ws_send {command}: {args}")
+        trace(f"XTB _ws_send {command}: {args}")
         dict_data = self._ws_mkcmd(command, **args)
         time.sleep(0.2)
         try:
@@ -31,14 +31,14 @@ class XTB(Provider):
         except WebSocketConnectionClosedException:
             return (False, "web socket closed")
         res = json.loads(r)
-        debug2(f"ws_send res: {res}")
+        trace(f"ws_send res: {res}")
         res_data = None
         if 'returnData' in res.keys():
             res_data = res['returnData']
         return (res['status'], res_data)
 
     def init(self, **data):
-        debug2(f"Provider XTB({self.name}) init: {data}")
+        trace(f"Provider XTB({self.name}) init: {data}")
         ws = data.get("url", None)
         login = data.get("login", None)
         pw = data.get("password", None)
@@ -48,7 +48,7 @@ class XTB(Provider):
 
         self._ws = create_connection(ws)
         status, data = self._ws_send("login", userId=login, password=pw)
-        debug2(f"login: {status} {data}")
+        trace(f"login: {status} {data}")
         # TODO die if login failed
         self._get_currency()
         self._refresh_assets()
@@ -69,7 +69,7 @@ class XTB(Provider):
 
     def _get_currency(self):
         status, data = self._ws_send("getCurrentUserData")
-        debug2(f"XTB buy getCurrentUserData sent {status} {data}")
+        trace(f"XTB buy getCurrentUserData sent {status} {data}")
         if status:
             ac = data.get("currency", None)
 
@@ -79,18 +79,18 @@ class XTB(Provider):
         self._account_currency = ac.strip().lower()
 
     def _refresh_assets(self):
-        debug2(f"Provider XTB({self.name}) _refresh_assets")
+        trace(f"Provider XTB({self.name}) _refresh_assets")
         products = []
         assets = []
         status, data = self._ws_send("getTrades", openedOnly=True)
-        debug2(f"XTB getTrades(openedOnly=True): {status}: {json.dumps(data, indent=4)}")
+        trace(f"XTB getTrades(openedOnly=True): {status}: {json.dumps(data, indent=4)}")
         if not status:
             error("XTB getTrades")
         pf_amounts = {}
         for r in data:
             symbol = r["symbol"]
             pf_amounts[symbol] = pf_amounts.get(symbol, 0.0) + r["volume"]
-        debug2(f"XTB sum: {pprint.pformat(pf_amounts)}")
+        trace(f"XTB sum: {pprint.pformat(pf_amounts)}")
         values = {}
         # move somewhere else?
         for symbol in self._ASSET_CLASSES:
@@ -101,9 +101,9 @@ class XTB(Provider):
             if not status:
                 # some symbols are different in real and demo version,
                 # e.g., IGLN.UK / IGLN.UK_9; continue if not found
-                debug2(f"XTB getSymbol {symbol} not found (data: {data})")
+                trace(f"XTB getSymbol {symbol} not found (data: {data})")
                 continue
-            debug2(f"XTB getSymbol({symbol}): {pprint.pformat(data)}")
+            trace(f"XTB getSymbol({symbol}): {pprint.pformat(data)}")
             avg_price = (data["bid"]+data["ask"] ) / 2
             currency = data["currency"]
             product=Product(
@@ -129,14 +129,14 @@ class XTB(Provider):
 
     def _get_free_cash(self):
         status, data = self._ws_send("getMarginLevel")
-        debug2(f"XTB buy getMarginLevel sent {status} {data}")
+        trace(f"XTB buy getMarginLevel sent {status} {data}")
         if status:
             return data.get("balance", None)
 
         return None
 
     def _sell(self, product, amount):
-        debug2(f"XTB selling {amount} of {product}")
+        trace(f"XTB selling {amount} of {product}")
         tti = {
             "cmd": 1, # SELL
             "price": float(product.price.num),
@@ -145,7 +145,7 @@ class XTB(Provider):
             "volume": float(amount)
         }
         status, data = self._ws_send("tradeTransaction", tradeTransInfo=tti)
-        debug2(f"XTB _sell tradeTransaction sent {status} {data}")
+        trace(f"XTB _sell tradeTransaction sent {status} {data}")
         if not status:
             warn(f"XTB _sell error: {data}")
             return False
@@ -158,7 +158,7 @@ class XTB(Provider):
         if not status:
             warn(f"XTB status error: {data}")
             return False
-        debug2(f"XTB _sell tradeTransactionStatus sent {status} {data}")
+        trace(f"XTB _sell tradeTransactionStatus sent {status} {data}")
         order_status = data.get("requestStatus", None)
         if order_status is None:
             warn(f"XTB _sell error: no requestStatus")
@@ -171,9 +171,9 @@ class XTB(Provider):
         return False
 
     def buy(self, product, amount, wait_cycles=3, wait_time=3):
-        debug2(f"XTB want to buy {amount:.4f} of {product}")
+        trace(f"XTB want to buy {amount:.4f} of {product}")
         amount = int(floor(amount))
-        debug2(f"XTB actually want to buy {amount} of {product} (no fractions)")
+        trace(f"XTB actually want to buy {amount} of {product} (no fractions)")
         if amount < 1:
             debug(f"XTB: not buying zero amount")
             return 0.0
@@ -199,17 +199,17 @@ class XTB(Provider):
             if not res:
                 warn(f"XTB error selling {sell_amount} of cash product {cash_product}")
                 return 0.0
-            debug2(f"XTB buy: successfully sold {sell_amount} of {cash_product.name}")
+            trace(f"XTB buy: successfully sold {sell_amount} of {cash_product.name}")
             # let's wait for the free cash
-            debug2(f"XTB buy: waiting for free_cash > need_cash {need_cash:.2f}")
+            trace(f"XTB buy: waiting for free_cash > need_cash {need_cash:.2f}")
             for i in range(wait_cycles):
-                debug2(f"XTB buy: waiting iteration {i}")
+                trace(f"XTB buy: waiting iteration {i}")
                 free_cash = self._get_free_cash()
-                debug2(f"XTB buy: waiting free_cash: {free_cash:.2f}")
+                trace(f"XTB buy: waiting free_cash: {free_cash:.2f}")
                 if free_cash >= need_cash:
-                    debug2(f"XTB buy: free_cash is available")
+                    trace(f"XTB buy: free_cash is available")
                     break
-                debug2(f"XTB buy: free_cash not yet available")
+                trace(f"XTB buy: free_cash not yet available")
                 if i < wait_cycles-1:
                     time.sleep(wait_time)
         tti = {
@@ -226,7 +226,7 @@ class XTB(Provider):
             "volume": float(amount)
         }
         status, data = self._ws_send("tradeTransaction", tradeTransInfo=tti)
-        debug2(f"XTB buy tradeTransaction sent {status} {data}")
+        trace(f"XTB buy tradeTransaction sent {status} {data}")
         if not status:
             warn(f"XTB buy error: {data}")
             return 0.0
@@ -239,7 +239,7 @@ class XTB(Provider):
         if not status:
             warn(f"XTB status error: {data}")
             return 0.0
-        debug2(f"XTB buy tradeTransactionStatus sent {status} {data}")
+        trace(f"XTB buy tradeTransactionStatus sent {status} {data}")
         order_status = data.get("requestStatus", None)
         if order_status is None:
             warn(f"XTB buy error: no requestStatus")
