@@ -1,6 +1,6 @@
 [project]
 name = "autopie"
-version = "0.0.14"
+version = "0.0.15"
 description = "Boring investment automation"
 dependencies = [
     "python-dotenv>=1.0.1",
@@ -10,6 +10,7 @@ dependencies = [
     "krakenex>=2.2.2",
     "pandas>=2.2.3",
     "yfinance>=0.2.44",
+    "click-default-group>=1.2.4",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

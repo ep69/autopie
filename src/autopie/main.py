@@ -9,6 +9,8 @@ import dotenv
 import tomllib
 from copy import deepcopy
 import click
+from click_default_group import DefaultGroup
+import importlib.metadata
 
 from .core import AbstractPortfolio, RealPortfolio, Price, Provider, Strategy
 from .util import *
@@ -46,7 +48,15 @@ def substitute_secrets(secrets, data):
         debug(f"substitute_secrets: type of {data} is {type(data)}")
         return
 
-@click.command()
+@click.group(cls=DefaultGroup, default='invest', default_if_no_args=True)
+def main():
+    pass
+
+@main.command()
+def version():
+    print(importlib.metadata.version("autopie"))
+
+@main.command()
 @click.option(
         "-d", "--debug", "debug_level",
         type=click.IntRange(min=0, max=2),
@@ -62,7 +72,7 @@ def substitute_secrets(secrets, data):
         show_default=True,
         help="Configuration directory",
     )
-def main(debug_level=0, config_dir="~/.config"):
+def invest(debug_level, config_dir):
     set_verbose(debug_level)
     info(f"Debug: {debug_level}")
 
@@ -214,9 +224,5 @@ def main(debug_level=0, config_dir="~/.config"):
 
     return 0
 
-if __name__ == '__main__':
-    sys.exit(main())
-
 # TODO:
-# * name: boring, bot, portfolio, passive, rebalance, pie, auto
-# * packaging
+# * logging
